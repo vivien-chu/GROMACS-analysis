@@ -1,5 +1,5 @@
 These files are used to:
-1. Get the bond information from GROMACS output angle gro file(such as angle.gro):
+1. Get the bond information from GROMACS output angle gro file(such as angle.gro), you need to change the atom name in the file to your own:
 angle_to_bond.py.
 2. Calculate the bond correlation function for the bond: bondcorrelation.py
 3. Use Vogel-Fulcher-Tammann function to fit to the bond correlation function:
