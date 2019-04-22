@@ -9,22 +9,32 @@ import os
 import subprocess
 import pdb
 
-# need to set proper parameters for mdp file
-# put scancel.sh into sup
+# Initial guess for sigma and epsilon. They are a fraction of the previous value.
 sigma = 0.9
 epsi = 0.98
+# The range to generate children.
 step = 0.1
+# For converge performance, smaller step in later iteration.
 step_change_rate = 0.1
+# keyword for the submitting job, used for cancel and resubmition
 key_word = "round8"
+# To determine number of jobs with your keyword is done or not
 job_num_base = 0
+# Predifined precision to stop evolution
 precision = 1e-8
+# Maximum number of iteration
 max_iter = 10000
+# Number of children for each generation
 generation = 15
+# Experimental density-temperature curve slope and intercept
 exp_slope = -5.26235681e-04
 exp_inter = 1.09025142e+00
+# Cooling temperature
 start_t = 370
 end_t = 400
+# Temperture interval to plot simulation density-temperature curve
 temp_step = 2
+# Time interval to check if the previous job is done
 sleep_time = 60
 
 # return the slope and intercect from simulation for temperature range
@@ -40,9 +50,8 @@ def simulation_value(num):
         ds.append(reduce(lambda x, y: x + y, d) / len(d) / 1000)
         z = np.polyfit(ts, ds,1)
     return z
-        
-        
-
+                
+# Create forcefield files with given sigma and epsilon
 def set_param(sigma_c, epsi_c):
     sigma_scale = sigma_c
     epsi_scale = epsi_c
@@ -81,25 +90,39 @@ def set_param(sigma_c, epsi_c):
 
 
 error = 100000
+
+# Output the smallest error among the children for each iteration
 with open("error.out", 'w') as out:
     out.write("# iteration    error    stepsize\n ")
+    
+# Output the sigma, epsilon and error for all generation
 with open("rst.out", "w") as rstout:
     rstout.write("{:16s}{:16s}{:16s}{:16s}\n".format("num", "sigma", "epsi", "error"))
+    
+# Run    
 for i in range(max_iter):
     with open("rst.out", "a") as rstout:
         rstout.write("{:10d}{:10s}\n".format(i, "th iteration"))
     sigma_c = []
     epsi_c = []
-    # 10 generation every step
-    # equilibrating with new sigma and epsi value
+    
+    # Random generate sigma and epsilon value within range of step
     for j in range(generation):
         sigma_c.append(sigma + step * (random.random() * 2 - 1))
         epsi_c.append(epsi + step * (random.random() * 2 - 1))
         print j, sigma_c, epsi_c
+        
+    # Create force field files    
     set_param(sigma_c, epsi_c)
+    
+    # Command to show the list of current running job. CHANGE THE USER NAME TO YOUR OWN.
     showjob = 'squeue -u msx626 -o "%.9i %.9P %.25j %.4u %.2t %.10M %.5D %R"'
     cmd = showjob + " > jobs"
     os.system(cmd)
+    
+    # Equilibrating the system with given sigma and epsilon
+    # If the all the jobs finish, the systems are all done equilibration.
+    # Monitor the number of running jobs with your keyword to determine if equilibration is done.
     print "Systems are equlibrating to new sigma and epsi"
     while True:
         with open("jobs", 'r') as f:
@@ -107,7 +130,6 @@ for i in range(max_iter):
         lines = [line for line in lines if key_word in line]
         print "number of jobs", len(lines)
         num_jobs = len(lines)
-       # os.system("rm -rf jobs")
         if num_jobs <= job_num_base:
             break
         os.system(cmd)
@@ -115,7 +137,8 @@ for i in range(max_iter):
         print "number of jobs remaining for equilibrating", num_jobs
         time.sleep(sleep_time)
     pdb.set_trace()
-    # cooling down
+    
+    # Cool down, same procedure as equilibration
     for j in range(generation):
         os.system("cd " + str(j) + " && sbatch job_cooling")
     print "Systems are cooling down"
@@ -136,6 +159,7 @@ for i in range(max_iter):
     for j in range(generation):
         os.system("cd " + str(j) + " && bash set1.sh")
      
+    # Calculate the density-temperature simulation curve
     os.system(cmd)
     while True:
         with open("jobs", 'r') as f:
@@ -148,6 +172,8 @@ for i in range(max_iter):
         os.system(cmd)
         print "number of jobs remaining for dump snapshots", num_jobs
         time.sleep(sleep_time)
+        
+    # Calculate error for all the children of this iteration
     for j in range(generation):
         sim_value = simulation_value(j)
         new_error = (sim_value[0] - exp_slope) ** 2 + (sim_value[1] - exp_inter) ** 2
@@ -159,6 +185,8 @@ for i in range(max_iter):
             sigma = sigma_c[j]
             epsi = epsi_c[j]
             error = new_error
+            
+    # Change to a smaller range for converge performance
     step *= step_change_rate
     with open("error.out", 'a') as out:
         out.write('{:10d}{:16.5f}{:16.5f}\n'.format(i, error, step))
