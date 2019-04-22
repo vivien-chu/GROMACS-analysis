@@ -1,1 +1,1 @@
-This folder includes essential files for the evolution: force field files, gro files, mdp files for GROMACS, the experimental density-temperature file(rubber.dat), sbatch files to submit and cancel jobs. 
+This folder includes essential files for the evolution: force field files, gro files, mdp files for GROMACS, the experimental density-temperature file(rubber.dat). And some unnecessary but useful tool files to make life easier.
