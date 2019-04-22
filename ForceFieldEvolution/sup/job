@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#SBATCH --job-name=rubbersw
+#SBATCH --partition=depablo-sandyb
+#SBATCH --output=gromacs-%j.out
+#SBATCH --exclusive
+#SBATCH --output=zout
+#SBATCH --error=zerr
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+
+module unload openmpi
+#module load cuda
+module load gromacs 
+grompp -f simulation.mdp -c 400.gro -o npt.tpr -p chains.top
+mdrun -s npt.tpr -cpi npt.cpt -deffnm npt -pin on

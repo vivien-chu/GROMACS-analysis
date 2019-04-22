@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#SBATCH --job-name=rubbersw400
+#SBATCH --partition=depablo-sandyb
+#SBATCH --output=gromacs-%j.out
+#SBATCH --exclusive
+#SBATCH --output=zout
+#SBATCH --error=zerr
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+
+module unload openmpi
+#module load cuda
+module load gromacs 
+mdrun -s 400.tpr -cpi 400.cpt -deffnm 400 -pin on

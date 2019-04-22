@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#SBATCH --job-name=evolution
+#SBATCH --partition=depablo-sandyb
+#SBATCH --output=gromacs-%j.out
+#SBATCH --exclusive
+#SBATCH --output=zout
+#SBATCH --error=zerr
+#SBATCH --nodes=1
+
+module load Anaconda2
+python evolution.py

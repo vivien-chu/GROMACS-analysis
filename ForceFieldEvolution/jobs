@@ -1,0 +1,7 @@
+    JOBID PARTITION                      NAME USER ST       TIME NODES NODELIST(REASON)
+ 56040215 depablo-s         equirubber0round8 msx6 PD       0:00     1 (None)
+ 56040216 depablo-s         equirubber1round8 msx6 PD       0:00     1 (None)
+ 56040217 depablo-s         equirubber2round8 msx6 PD       0:00     1 (None)
+ 56040219 depablo-s         equirubber0round8 msx6 PD       0:00     1 (None)
+ 56040220 depablo-s         equirubber1round8 msx6 PD       0:00     1 (None)
+ 56040222 depablo-s         equirubber2round8 msx6 PD       0:00     1 (None)
