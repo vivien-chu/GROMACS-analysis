@@ -101,10 +101,6 @@ def main(argv):
                     if line:
                         lines.append(line)
                     
-                   
-
-
-   # outs.close()
     outv.close()
 
 
